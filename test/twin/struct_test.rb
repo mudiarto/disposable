@@ -50,16 +50,14 @@ class TwinStructTest < MiniTest::Spec
 end
 
 
-# Non-lazy initialization. This will copy all properties from the wrapped object to the twin.
+# Non-lazy initialization. This will copy all properties from the wrapped object to the twin when
+# instantiating the twin.
 module NonLazyy
   def initialize(model, options={})
-    @fields = self.class.representer_class.new(model).to_hash
-  end
-
-  def read_property(name, private_name)
-    return @fields[name.to_s]
+    @fields = self.class.representer_class.new(model).to_hash # TODO: options!
   end
 end
+
 class TwinWithNestedStructTest < MiniTest::Spec
   class Song < Disposable::Twin
     include NonLazyy
