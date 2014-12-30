@@ -9,6 +9,13 @@ module Disposable
 
         from_hash(model.merge(options))
       end
+
+
+      module Sync
+        def sync
+          model.replace self.class.representer_class.new(self).to_hash
+        end
+      end
     end
   end
 end

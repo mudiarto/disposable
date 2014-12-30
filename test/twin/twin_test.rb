@@ -87,29 +87,6 @@ class TwinDecoratorTest < MiniTest::Spec
 end
 
 
-require 'disposable/twin/struct'
-class TwinStructTest < MiniTest::Spec
-  class Song < Disposable::Twin
-    include Struct
-    property :number, :default => 1 # FIXME: this should be :default_if_nil so it becomes clear with a model.
-    option   :cool?
-  end
-
-  # empty hash
-  it { Song.new({}).number.must_equal 1 }
-  # model hash
-  it { Song.new(number: 2).number.must_equal 2 }
-
-  # with hash and options as one hash.
-  it { Song.new(number: 3, cool?: true).cool?.must_equal true }
-  it { Song.new(number: 3, cool?: true).number.must_equal 3 }
-
-  # with model hash and options hash separated.
-  it { Song.new({number: 3}, {cool?: true}).cool?.must_equal true }
-  it { Song.new({number: 3}, {cool?: true}).number.must_equal 3 }
-end
-
-
 class TwinAsTest < MiniTest::Spec
   module Model
     Song  = Struct.new(:title, :album)
@@ -131,9 +108,25 @@ class TwinAsTest < MiniTest::Spec
       # model Model::Song
     end
   end
-
 end
 
+module NonLazy
+  def initialize(model, options={})
+    super
+
+    input = self.class.representer_class.new(model).to_hash
+    self.class.write_representer.new(self).from_hash(input)
+  end
+end
+
+class TwinGetterTest < MiniTest::Spec
+  class Album < Disposable::Twin
+    include NonLazy
+    property :name, getter: lambda { |*| title } # DISCUSS: this is executed in model context.
+  end
+
+  it("xxx") { Album.new(OpenStruct.new(title: "Calico Silver")).name.must_equal "Calico Silver" }
+end
 
 class TwinOptionTest < TwinTest
   class Song < Disposable::Twin
