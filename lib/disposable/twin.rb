@@ -10,6 +10,9 @@ require 'disposable/twin/builder'
 #   write: write to @fields
 #   sync/save is the only way to write back to the model.
 
+
+# twin.write(title: "Poy", options: {published: true}) => assign and sync!
+
 module Disposable
   class Twin
     extend Uber::InheritableAttr
