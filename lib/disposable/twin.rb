@@ -82,5 +82,13 @@ module Disposable
       options[:from] = as
       warn "[Disposable] The :as options got renamed to :from."
     end
+
+
+    module Sync
+      def sync
+        # call sync on all nested twins, as we do it in reform.
+      end
+    end
+    include Sync
   end
 end

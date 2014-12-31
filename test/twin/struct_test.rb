@@ -78,20 +78,31 @@ class TwinWithNestedStructTest < MiniTest::Spec
       # property :released
     end
 
+    # TODO: hash in hash!
+
   end
 
   let (:model) { OpenStruct.new(title: "Seed of Fear and Anger", options: {recorded: true}) }
 
-  it("xxx") { Song.new(model).options.recorded.must_equal true }
+  it { Song.new(model).options.recorded.must_equal true }
+
   it {
-  song = Song.new(model)
+    song = Song.new(model)
     song.options.recorded = "yo"
     song.options.recorded.must_equal "yo"
 
     # song.extend(Disposable::Twin::Struct::Sync)
-    # song.sync
+    song.sync
 
     model.title.must_equal "Seed of Fear and Anger"
     model.options[:recorded].must_equal "yo"
      }
 end
+
+
+
+# reform
+#   sync: twin.title = "Good Bye"
+#         album.sync (copy attributes in nested form)
+#           twin.name = "Matters"
+#   save: twin.save (this will do twin.sync... does that call save on all nested twins, too, or do we still have to do that in reform?)

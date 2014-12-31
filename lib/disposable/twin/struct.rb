@@ -16,6 +16,8 @@ module Disposable
           model.replace self.class.representer_class.new(self).to_hash
         end
       end
+
+      include Sync
     end
   end
 end
