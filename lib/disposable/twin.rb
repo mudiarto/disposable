@@ -69,7 +69,7 @@ module Disposable
        @fields[name.to_s] = value
     end
 
-    def from_hash(options)
+    def from_hash(options, *)
       self.class.write_representer.new(self).from_hash(options)
     end
 

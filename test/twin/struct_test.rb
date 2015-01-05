@@ -68,10 +68,6 @@ class TwinWithNestedStructTest < MiniTest::Spec
       include Struct
       property :show_image
       property :play_teaser
-
-      def to_hash(*)
-        raise
-      end
     end
 
     class HH < Disposable::Twin
@@ -79,7 +75,9 @@ class TwinWithNestedStructTest < MiniTest::Spec
       property :recorded
       property :released
 
-      property :preferences, instance: lambda { |value, *| Preferences.new(value) } do
+      property :preferences,
+        instance: lambda { |value, *| Preferences.new(value) },
+        prepare:  lambda { |obj, *| obj } do # don't extend the object with module from :extend (why is that?)
       end
     end
 
@@ -109,7 +107,11 @@ class TwinWithNestedStructTest < MiniTest::Spec
   # public "hash" writer
   it ("xxx") {
     song = Song.new(model)
-    puts song.inspect
+
+    # puts song.options.inspect
+    puts song.options.preferences.to_hash
+    # raise
+
     song.options.recorded = "yo"
     song.options.recorded.must_equal "yo"
 
