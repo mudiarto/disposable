@@ -54,6 +54,7 @@ end
 # instantiating the twin.
 module NonLazyy
   def initialize(model, options={})
+    @model = model
     @fields = self.class.representer_class.new(model).to_hash # TODO: options!
   end
 end
@@ -63,11 +64,27 @@ class TwinWithNestedStructTest < MiniTest::Spec
     include NonLazyy
     property :title
 
+    class Preferences < Disposable::Twin
+      include Struct
+      property :show_image
+      property :play_teaser
+
+      def to_hash(*)
+        raise
+      end
+    end
+
     class HH < Disposable::Twin
       include Struct
       property :recorded
       property :released
+
+      property :preferences, instance: lambda { |value, *| Preferences.new(value) } do
+      end
     end
+
+
+
 
     property :options, prepare: lambda { |model, *args| HH.new(model) },
       # instance: lambda { |fragment, *| fragment },
@@ -82,20 +99,32 @@ class TwinWithNestedStructTest < MiniTest::Spec
 
   end
 
-  let (:model) { OpenStruct.new(title: "Seed of Fear and Anger", options: {recorded: true}) }
+  # FIXME: test with missing hash properties, e.g. without released and with released:false.
+  let (:model) { OpenStruct.new(title: "Seed of Fear and Anger", options: {recorded: true, released: 1,
+    preferences: {show_image: true, play_teaser: 2}}) }
 
+  # public "hash" reader
   it { Song.new(model).options.recorded.must_equal true }
 
-  it {
+  # public "hash" writer
+  it ("xxx") {
     song = Song.new(model)
+    puts song.inspect
     song.options.recorded = "yo"
     song.options.recorded.must_equal "yo"
 
+    song.options.preferences.show_image.must_equal true
+    song.options.preferences.play_teaser.must_equal 2
+
+    song.options.preferences.show_image= 9
+
+
     # song.extend(Disposable::Twin::Struct::Sync)
-    song.sync
+    song.sync # this is only called on the top model, e.g. in Reform#save.
 
     model.title.must_equal "Seed of Fear and Anger"
-    model.options[:recorded].must_equal "yo"
+    model.options["recorded"].must_equal "yo"
+    model.options["preferences"].must_equal({"show_image" => 9, "play_teaser"=>2})
      }
 end
 
