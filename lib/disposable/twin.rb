@@ -98,61 +98,36 @@ module Disposable
       end
 
     private
-      def sync!(options) # semi-public.
-
-        input = sync_hash(options)
-        # if aliased_model was a proper Twin, we could do changed? stuff there.
-
-        options.delete(:exclude) # TODO: can we use 2 options?
-
-        dynamic_sync_representer.new(aliased_model).from_hash(input, options) # sync properties to Song.
-
-        model
-      end
-
-      def input_representer
-        self.class.representer(:input, :all => true) do |dfn|
-          if dfn[:form]
-            dfn.merge!(
-              :representable  => false,
-              :prepare        => lambda { |obj, *| obj },
-            )
-          else
-            dfn.merge!(:render_nil => true) # do sync nil values back to the model for scalars.
-          end
-        end
-      end
-
-      # Writes input to model.
-      def sync_representer
-        self.class.representer(:sync, :all => true) do |dfn|
-          if dfn[:form]
-            dfn.merge!(
-              :instance     => lambda { |fragment, *| fragment }, # use model's nested property for syncing.
-                # FIXME: do we allow options for #sync for nested forms?
-              :deserialize => lambda { |object, *| model = object.sync!({}) } # sync! returns the synced model.
-              # representable's :setter will do collection=([..]) or property=(..) for us on the model.
-            )
-          end
-        end
-      end
-
-      def self.representers # keeps all transformation representers for one class.
-        @representers ||= {}
-      end
-
-      def self.representer(name=nil, options={}, &block)
-        return representer_class.each(&block) if name == nil
-        return representers[name] if representers[name] # don't run block as this representer is already setup for this form class.
-
-        only_forms = options[:all] ? false : true
-        base       = options[:superclass] || representer_class
-
-        representers[name] = Class.new(base).each(only_forms, &block) # let user modify representer.
-      end
-
 
     end
     include Sync
+
+
+
+    def setup_representer
+      self.class.representer(:setup) do |dfn| # only nested forms.
+        dfn.merge!(
+          :representable => false, # don't call #to_hash, only prepare.
+          :prepare       => lambda { |model, args| args.binding[:form].new(model) } # wrap nested properties in form.
+        )
+      end
+    end
+
+    # TODO: share this with reform.
+    def self.representers # keeps all transformation representers for one class.
+      @representers ||= {}
+    end
+
+    def self.representer(name=nil, options={}, &block)
+      return representer_class.each(&block) if name == nil
+      return representers[name] if representers[name] # don't run block as this representer is already setup for this form class.
+
+      only_forms = options[:all] ? false : true
+      base       = options[:superclass] || representer_class
+
+      representers[name] = Class.new(base).each(only_forms, &block) # let user modify representer.
+    end
+
+
   end
 end

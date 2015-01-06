@@ -55,6 +55,18 @@ end
 module NonLazyy
   def initialize(model, options={})
     @model = model
+
+    @fields = self.class.representer(:setup) do |dfn|
+      dfn.merge!(
+        :representable => false, # don't call #to_hash, only prepare.
+        :prepare       => lambda { |model, args|
+
+          puts "building #{args.binding[:twin].evaluate(nil)} with #{model.inspect}"
+
+          args.binding[:twin].evaluate(nil).new(model) } # wrap nested properties in form.
+      )
+    end.new(model).to_hash
+return
     @fields = self.class.representer_class.new(model).to_hash # TODO: options!
   end
 end
@@ -76,17 +88,21 @@ class TwinWithNestedStructTest < MiniTest::Spec
       property :released
 
       property :preferences,
-        instance: lambda { |value, *| Preferences.new(value) },
-        prepare:  lambda { |obj, *| obj } do # don't extend the object with module from :extend (why is that?)
+        # instance: lambda { |value, *| Preferences.new(value) },
+        # prepare:  lambda { |obj, *| obj } \
+        twin: Preferences do # don't extend the object with module from :extend (why is that?)
       end
     end
 
 
 
 
-    property :options, prepare: lambda { |model, *args| HH.new(model) },
-      # instance: lambda { |fragment, *| fragment },
-      representable: false do # don't call #to_hash, this is triggered in the twin's constructor.
+    property :options,
+
+      # prepare: lambda { |model, *args| HH.new(model) },
+      # representable: false
+
+      twin: HH do # don't call #to_hash, this is triggered in the twin's constructor.
 
 
       # property :recorded
@@ -107,6 +123,8 @@ class TwinWithNestedStructTest < MiniTest::Spec
   # public "hash" writer
   it ("xxx") {
     song = Song.new(model)
+
+    puts song.inspect
 
     # puts song.options.inspect
     puts song.options.preferences.to_hash

@@ -18,7 +18,17 @@ module Disposable
           find_all { |attr| attr[:twin] }.
           collect { |attr| attr.name.to_sym }
       end
+
+      # TODO: merge with reform.
+      def self.each(only_twin=true, &block)
+        definitions = representable_attrs
+        definitions = representable_attrs.find_all { |attr| attr[:twin] } if only_twin
+
+        definitions.each(&block)
+        self
+      end
     end
+
 
     class Definition < Representable::Definition
       def dynamic_options

@@ -4,7 +4,31 @@ module Disposable
     #
     #   Twin.new(id: 1)
     module Struct
+      # Structs use from_hash as they can simply consume the incoming hash.
       def initialize(model, options={})
+        @model = model
+
+        @fields = {}
+
+        self.class.representer(:setup) do |dfn|
+          dfn.merge!(
+            :representable => false, # don't call #to_hash, only prepare.
+            :instance       => lambda { |model, args|
+
+              puts "building #{args.binding[:twin].evaluate(nil)} with #{model.inspect}"
+
+              args.binding[:twin].evaluate(nil).new(model) }, # wrap nested properties in form.
+
+              prepare:  lambda { |obj, *| obj }
+          )
+        end.new(self).from_hash(model)
+
+
+
+        return
+
+
+
         super # call from_hash(options) # FIXME: this is wrong and already calls from_hash(options)
 
         #puts "@@@@@@ merge #{model.inspect} in #{self}"
@@ -14,6 +38,7 @@ module Disposable
 
       module Sync
         def sync
+          puts "~~~~#{preferences.to_hash}"
           return {"recorded" => recorded, "released"=>released, "preferences" => preferences.to_hash}
 
 
@@ -27,7 +52,11 @@ module Disposable
 
 
       def to_hash
-        self.class.representer_class.new(self).to_hash
+        self.class.representer(:sync) do |dfn|
+          dfn.merge!(prepare:  lambda { |obj, *|
+            puts "to_hash: #{obj.inject}"
+            obj })
+        end.new(self).to_hash
       end
     end
   end
