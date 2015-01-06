@@ -52,28 +52,11 @@ end
 
 # Non-lazy initialization. This will copy all properties from the wrapped object to the twin when
 # instantiating the twin.
-module NonLazyy
-  def initialize(model, options={})
-    @model = model
 
-    @fields = self.class.representer(:setup) do |dfn|
-      dfn.merge!(
-        :representable => false, # don't call #to_hash, only prepare.
-        :prepare       => lambda { |model, args|
-
-          puts "building #{args.binding[:twin].evaluate(nil)} with #{model.inspect}"
-
-          args.binding[:extend].evaluate(nil).new(model) } # wrap nested properties in form.
-      )
-    end.new(model).to_hash
-return
-    @fields = self.class.representer_class.new(model).to_hash # TODO: options!
-  end
-end
 
 class TwinWithNestedStructTest < MiniTest::Spec
   class Song < Disposable::Twin
-    include NonLazyy
+    include Setup
     property :title
 
     property :options, twin: true do # don't call #to_hash, this is triggered in the twin's constructor.
