@@ -63,7 +63,7 @@ module NonLazyy
 
           puts "building #{args.binding[:twin].evaluate(nil)} with #{model.inspect}"
 
-          args.binding[:twin].evaluate(nil).new(model) } # wrap nested properties in form.
+          args.binding[:extend].evaluate(nil).new(model) } # wrap nested properties in form.
       )
     end.new(model).to_hash
 return
@@ -76,27 +76,16 @@ class TwinWithNestedStructTest < MiniTest::Spec
     include NonLazyy
     property :title
 
-    class Preferences < Disposable::Twin
-      include Struct
-      property :show_image
-      property :play_teaser
-    end
-
-    class HH < Disposable::Twin
+    property :options, twin: true do # don't call #to_hash, this is triggered in the twin's constructor.
       include Struct
       property :recorded
       property :released
 
-      property :preferences, twin: Preferences do
+      property :preferences, twin: true do
+        include Struct
+        property :show_image
+        property :play_teaser
       end
-    end
-
-
-
-
-    property :options, twin: HH do # don't call #to_hash, this is triggered in the twin's constructor.
-      # property :recorded
-      # property :released
     end
   end
 

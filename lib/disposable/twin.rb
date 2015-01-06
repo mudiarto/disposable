@@ -128,6 +128,5 @@ module Disposable
       representers[name] = Class.new(base).each(only_forms, &block) # let user modify representer.
     end
 
-
   end
 end

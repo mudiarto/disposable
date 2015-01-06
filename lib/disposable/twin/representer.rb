@@ -27,6 +27,21 @@ module Disposable
         definitions.each(&block)
         self
       end
+
+
+      def self.default_inline_class
+        Twin
+      end
+      # Inline forms always get saved in :extend.
+      def self.build_inline(base, features, name, options, &block)
+        # features = options[:features]
+
+        Class.new(base || default_inline_class) do
+          # include *features
+
+          class_eval &block
+        end
+      end
     end
 
 

@@ -17,7 +17,7 @@ module Disposable
 
               puts "building #{args.binding[:twin].evaluate(nil)} with #{model.inspect}"
 
-              args.binding[:twin].evaluate(nil).new(model) }, # wrap nested properties in form.
+              args.binding[:extend].evaluate(nil).new(model) }, # wrap nested properties in form.
 
               prepare:  lambda { |obj, *| obj } # don't extend the object with module from :extend (why is that?)
           )
