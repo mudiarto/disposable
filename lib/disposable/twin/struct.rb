@@ -19,7 +19,7 @@ module Disposable
 
               args.binding[:twin].evaluate(nil).new(model) }, # wrap nested properties in form.
 
-              prepare:  lambda { |obj, *| obj }
+              prepare:  lambda { |obj, *| obj } # don't extend the object with module from :extend (why is that?)
           )
         end.new(self).from_hash(model)
 
@@ -52,11 +52,8 @@ module Disposable
 
 
       def to_hash
-        self.class.representer(:sync) do |dfn|
-          dfn.merge!(prepare:  lambda { |obj, *|
-            puts "to_hash: #{obj.inject}"
-            obj })
-        end.new(self).to_hash
+        # reuse setup representer for rendering hash.
+        self.class.representer(:setup).new(self).to_hash
       end
     end
   end

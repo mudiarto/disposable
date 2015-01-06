@@ -87,30 +87,17 @@ class TwinWithNestedStructTest < MiniTest::Spec
       property :recorded
       property :released
 
-      property :preferences,
-        # instance: lambda { |value, *| Preferences.new(value) },
-        # prepare:  lambda { |obj, *| obj } \
-        twin: Preferences do # don't extend the object with module from :extend (why is that?)
+      property :preferences, twin: Preferences do
       end
     end
 
 
 
 
-    property :options,
-
-      # prepare: lambda { |model, *args| HH.new(model) },
-      # representable: false
-
-      twin: HH do # don't call #to_hash, this is triggered in the twin's constructor.
-
-
+    property :options, twin: HH do # don't call #to_hash, this is triggered in the twin's constructor.
       # property :recorded
       # property :released
     end
-
-    # TODO: hash in hash!
-
   end
 
   # FIXME: test with missing hash properties, e.g. without released and with released:false.
