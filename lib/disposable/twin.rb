@@ -87,24 +87,16 @@ module Disposable
 
     module Sync
       def sync
-        sync_representer.new(model).extend(Representable::Debug).from_object(self)
-        return
-
-
-        # call sync on all nested twins, as we do it in reform.
-        model.title = title
-
-        #options.preferences.sync # fixme, of course.
-
-        # puts
-        # puts options.inspect
-        model.options = options.sync # this is kinda wrong, as that should all happen in one db transaction? model.update_attributes()
-
+        sync_representer.new(model).from_object(self)
       end
 
     private
 
       # used like Sync.new(model).from_hash(twin)
+      # does this:
+      #
+      # model.title = title
+      # model.album = album.sync
       def sync_representer
         kl = self.class.representer(:sync) do |dfn|
 

@@ -145,7 +145,7 @@ class TwinWithNestedStructTest < MiniTest::Spec
     puts song.inspect
 
     # puts song.options.inspect
-    puts song.options.preferences.to_hash
+    # puts song.options.preferences.to_hash
     # raise
 
     song.options.recorded = "yo"

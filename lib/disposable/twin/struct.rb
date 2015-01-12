@@ -27,23 +27,11 @@ module Disposable
 
       module Sync
         def sync
-          puts "~~~~#{preferences.to_hash}"
-          return {"recorded" => recorded, "released"=>released, "preferences" => preferences.to_hash}
-
-
-          representer = self.class.representer_class.new(self)
-
-          puts "======+++++= sync in Struct: #{representer.to_hash.inspect}"
-          model.replace self.class.representer_class.new(self).to_hash
+          # calls album.sync on nested properties.
+          sync_representer.new(self).to_hash # compiles a nested hash that Twin will assign to the hash column property.
         end
       end
       include Sync
-
-
-      def to_hash
-        # reuse setup representer for rendering hash.
-        self.class.representer(:setup).new(self).to_hash
-      end
     end
   end
 end
