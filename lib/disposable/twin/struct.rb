@@ -2,7 +2,7 @@ module Disposable
   class Twin
     # Twin that uses a hash to populate.
     #
-    #   Twin.new(id: 1)
+    #   Twin.new(id: 1, album: {title: "Matters"})
     module Struct
       # include Setup
 

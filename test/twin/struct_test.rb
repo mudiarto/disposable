@@ -2,6 +2,65 @@ require 'test_helper'
 require "representable/debug"
 
 require 'disposable/twin/struct'
+
+
+module Representable
+  module Object
+    class Binding < Representable::Binding
+      def self.build_for(definition, *args)  # TODO: remove default arg.
+        return Collection.new(definition, *args)  if definition.array?
+        new(definition, *args)
+      end
+
+      def read(hash)
+        hash.send(as) # :getter? no, that's for parsing!
+      end
+
+      def deserialize_method
+        :from_object
+      end
+
+      class Collection < self
+        include Representable::Binding::Collection
+      end
+    end
+  end
+end
+module Representable
+  # The generic representer. Brings #to_hash and #from_hash to your object.
+  # If you plan to write your own representer for a new media type, try to use this module (e.g., check how JSON reuses Hash's internal
+  # architecture).
+  module Object
+    def self.included(base)
+      base.class_eval do
+        include Representable
+        extend ClassMethods
+        register_feature Representable::Object
+      end
+    end
+
+
+    module ClassMethods
+      def collection_representer_class
+        Collection
+      end
+    end
+
+    def from_object(data, options={}, binding_builder=Binding)
+      update_properties_from(data, options, binding_builder)
+    end
+
+    # FIXME: remove me! only here to avoid AllowSymbols from Twin:Representer
+    def update_properties_from(doc, options, format)
+      representable_mapper(format, options).deserialize(doc, options)
+    end
+  end
+end
+
+
+
+
+
 class TwinStructTest < MiniTest::Spec
   class Song < Disposable::Twin
     include Struct
@@ -104,11 +163,26 @@ class TwinWithNestedStructTest < MiniTest::Spec
     model.title.must_equal "Seed of Fear and Anger"
     model.options["recorded"].must_equal "yo"
     model.options["preferences"].must_equal({"show_image" => 9, "play_teaser"=>2})
-     }
+  }
 end
 
 
 
+class SyncRepresenter < Representable::Decorator
+  include Representable::Object
+
+  property :title
+  property :album, instance: lambda { |fragment, *| fragment } do
+    property :name
+  end
+end
+
+album = Struct.new(:name).new("Ass It Is")
+
+SyncRepresenter.new(obj = Struct.new(:title, :album).new).from_object(Struct.new(:title, :album).new("Eternal Scream", album))
+
+puts obj.title.inspect
+puts obj.inspect
 # reform
 #   sync: twin.title = "Good Bye"
 #         album.sync (copy attributes in nested form)

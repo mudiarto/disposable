@@ -87,6 +87,10 @@ module Disposable
 
     module Sync
       def sync
+        sync_representer.new(model).extend(Representable::Debug).from_object(self)
+        return
+
+
         # call sync on all nested twins, as we do it in reform.
         model.title = title
 
@@ -99,6 +103,23 @@ module Disposable
       end
 
     private
+
+      # used like Sync.new(model).from_hash(twin)
+      def sync_representer
+        kl = self.class.representer(:sync) do |dfn|
+
+          if dfn[:extend]
+            dfn.merge!(
+              instance: lambda { |fragment, *| fragment }, # directly pass through nested property from twin.
+              prepare: lambda { |obj, *| obj.sync }, # call sync on the twin.
+              representable: false, # don't call #from_object.
+            )
+          end
+        end
+        kl.send :include, Representable::Object
+
+        kl
+      end
 
     end
     include Sync

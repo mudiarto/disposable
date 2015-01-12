@@ -9,7 +9,7 @@ private
     self.class.representer(:setup) do |dfn|
       dfn.merge!(
         representable: false, # don't call #to_hash, only prepare.
-        prepare:       lambda { |model, args| args.binding[:extend].evaluate(nil).new(model) }, # wrap nested properties in form.
+        prepare:       lambda { |model, args| args.binding[:extend].evaluate(nil).new(model) }, # wrap nested properties in twin.
       )
     end
   end
