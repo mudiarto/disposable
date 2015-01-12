@@ -19,19 +19,16 @@ module Disposable
       def setup_representer
         self.class.representer(:setup) do |dfn|
           dfn.merge!(
-            prepare:  lambda { |model, args| model },
-            instance: lambda { |model, args| args.binding[:extend].evaluate(nil).new(model) },
+            :prepare  => lambda { |model, args| model },
+            :instance => lambda { |model, args| args.binding[:extend].evaluate(nil).new(model) },
           )
         end
       end
 
-      module Sync
-        def sync
-          # calls album.sync on nested properties.
-          sync_representer.new(self).to_hash # compiles a nested hash that Twin will assign to the hash column property.
-        end
+      def sync
+        # calls album.sync on nested properties.
+        sync_representer.new(self).to_hash # compiles a nested hash that Twin will assign to the hash column property.
       end
-      include Sync
     end
   end
 end
