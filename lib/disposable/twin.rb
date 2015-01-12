@@ -117,16 +117,6 @@ module Disposable
     include Sync
 
 
-
-    def setup_representer
-      self.class.representer(:setup) do |dfn| # only nested forms.
-        dfn.merge!(
-          :representable => false, # don't call #to_hash, only prepare.
-          :prepare       => lambda { |model, args| args.binding[:form].new(model) } # wrap nested properties in form.
-        )
-      end
-    end
-
     # TODO: share this with reform.
     def self.representers # keeps all transformation representers for one class.
       @representers ||= {}
