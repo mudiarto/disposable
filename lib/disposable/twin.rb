@@ -101,11 +101,10 @@ module Disposable
       # model.album = album.sync
       def sync_representer
         kl = self.class.representer(:sync) do |dfn|
-
           if dfn[:extend]
             dfn.merge!(
-              instance: lambda { |fragment, *| fragment }, # directly pass through nested property from twin.
-              prepare: lambda { |obj, *| obj.sync }, # call sync on the twin.
+              instance:      lambda { |fragment, *| fragment }, # directly pass through nested property from twin.
+              prepare:       lambda { |obj, *| obj.sync }, # call sync on the twin.
               representable: false, # don't call #from_object.
             )
           end
