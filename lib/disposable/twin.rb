@@ -26,6 +26,9 @@ module Disposable
       options[:private_name] = options.delete(:from) || name
       options[:pass_options] = true
 
+      options[:features] ||= []
+      options[:features] += features.keys if block_given?
+
       representer_class.property(name, options, &block).tap do |definition|
         mod = Module.new do
           define_method(name)       { read_property(name, options[:private_name]) }
@@ -91,7 +94,6 @@ module Disposable
       end
 
     private
-
       # used like Sync.new(model).from_hash(twin)
       # does this:
       #
@@ -117,7 +119,15 @@ module Disposable
     include Sync
 
 
-    # TODO: share this with reform.
+    # TODO: share everything below with reform.
+    inheritable_attr :features
+    self.features = {}
+
+    def self.register_feature(mod)
+      features[mod] = true
+    end
+
+
     def self.representers # keeps all transformation representers for one class.
       @representers ||= {}
     end

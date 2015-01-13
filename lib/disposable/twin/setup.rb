@@ -1,4 +1,9 @@
+# Setup will read all defined properties to the twin at initialization (non-lazy).
 module Disposable::Twin::Setup
+  def self.included(base)
+    base.register_feature self
+  end
+
   def initialize(model, options={})
     @model  = model
     @fields = setup_representer.new(model).to_hash # TODO: options!
